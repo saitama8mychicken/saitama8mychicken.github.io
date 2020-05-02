@@ -1,0 +1,226 @@
+{% extends "CreateRule/Rule.html" %}
+{% block body_block %}
+<style>
+    * {
+    font-size : 15px;
+    letter-spacing : 1px;
+    }
+
+    .code{
+            padding: 5px;
+            background: #17141d;
+            color: #c2c2c2;
+            width: 50%;
+            float: left;
+            border: 1px solid white;
+            height: 400px;
+            resize: vertical;
+        }
+
+        .input{
+            padding: 5px;
+            background: #17141d;
+            width: 50%;
+            height: 400px;
+            float: right;
+            border: 1px solid white;
+            resize: vertical;
+        }
+
+
+        .result{
+            padding: 5px;
+            background: #17141d;
+            width: 100%;
+            height: 200px;
+            position: relative;
+            border: 1px solid white;
+            resize: vertical;
+        }
+        .code:hover, .result:hover, .input:hover{
+        border: 2px solid white;
+        }
+        .footer{
+        color: gray;
+       text-align: center;
+       bottom: 0px;
+       width: 100%;
+   }
+
+   #save{
+       background-color:#000;
+       padding: 5px 20px 5px 20px;
+       border: none;
+       margin: 3px;
+       font-size : 15px;
+       letter-spacing : 1px;
+   }
+   #save:hover{
+        border: 1px solid white;
+   }
+   .column{
+   width:45%;
+   background-color:#000;
+   color:white;
+   color: #20C20E;
+   font-size:20px
+   }
+</style>
+<section>
+    <div class="container">
+
+
+        <div class="code">
+            <nav class="navbar navbar-inverse" >
+                <ul class="nav navbar-nav">
+                    <li><a class="navbar-brand" href="">Start Coding..</a></li>
+                    <li><a class="nav-link " href="{% url 'CreateRule:create_rule' %}">Refresh</a></li>
+
+<!--                    To save the code-->
+                    {% if validated == 'True' %}
+                    <form class=" nav navbar-form navbar-right" method="post" enctype="multipart/form-data" >
+                        <div class="form-group">
+                            {% csrf_token %}
+                            <textarea type="text" hidden name="code">{{ code }}</textarea>
+                            <li><button id = 'save' type="submit" name="save" value="save">Save</button> </li>
+                        </div>
+                    </form>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% if validated == 'try_again' %}
+            <div style="color:red">
+                Invalid Code
+            </div>
+            {% endif %}
+            <form method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    {% csrf_token %}
+                    {% if validated == 'False' or validated == 'try_again' %}
+                        <textarea name="code" required class="form-control" rows="9" style="background-color: #000; color: #20C20E; font-size:20px">{{code }}</textarea>
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-success" name="" style="margin:5px">Validate</button>
+                        </div>
+                    {% else %}
+<!--                    show the code if validated-->
+                    <div class="" style="background-color: #000; color: #20C20E;">
+                        {{ code|linebreaks }}
+                    </div>
+                    <div class="footer">
+                        {% if saved == 'True' %}
+                        Code saved successfully
+                        {% else %}
+                        Code Validated successfully
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </form>
+
+    </div>
+
+<!--        input class-->
+        <form method="post" enctype="multipart/form-data" class="form">
+            {% if validated == 'True' %}
+                {% csrf_token %}
+        <div class="input" style="overflow-y:auto">
+            <nav class="navbar navbar-inverse" >
+                <ul class="nav navbar-nav">
+                  <li><a class="navbar-brand" href="">Input.. </a></li>
+                    <li>
+                        <input class="btn" type="button" id="add" value = "Add Column" style="margin:10px; background-color: #000; border:none; color: white">
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <button type="submit" class="btn btn-success" name="" style="margin:10px 30px 10px 10px"> RUN </button>
+                </ul>
+            </nav>
+
+                <textarea hidden name="code">{{ code }}</textarea>
+                <table>
+                    <tbody id="columns">
+
+                    {% for key, value in input.items %}
+                    <div style="display:block">
+                        <input type="text" placeholder="Column name*" name="column" maxlength="100" class="form-control column" style="float:left" required value="{{ key }}">
+                        <select name="type" class="form-control column " style="float:right">
+                        {% if value  == 'metrics' %}
+                            <option value="metrics" selected>Metrics</option>
+                            <option value="categorical">Categorical</option>
+                            <option value="temporal_dimension">Temporal</option>
+                        {% elif value == 'categorical'  %}
+                            <option value="metrics" >Metrics</option>
+                            <option value="categorical" selected>Categorical</option>
+                            <option value="temporal_dimension">Temporal</option>
+                        {% else %}
+                            <option value="metrics" selected>Metrics</option>
+                            <option value="categorical">Categorical</option>
+                            <option value="temporal_dimension" selected>Temporal</option>
+                        {% endif %}
+                        </select>
+                        <br><br>
+                    </div>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+        </form>
+    </div>
+</section>
+<section>
+    {% if validated == 'True' %}
+    <div class="container">
+        <div class="result">
+            <h2 align="center"> Result </h2>
+            <div style="color: blue; font-size: 20px">
+<!--                {{ output }}-->
+                {% for key, value in output.items %}
+                {{key}} - {{value}}<br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</section><br><br><br>
+<script>
+      var id = 0;
+      var clas = "";
+
+      $(document).ready(function(){
+      $('#add').click(function(){
+            var html = [];
+
+
+            html.push('<div class="attrib_'+id+'"><input type="text" placeholder="Column name*" name="column" maxlength="100" class="form-control column" style="float:left" required><button class="text-right" type="button" id="attrib_'+id+'" style="background-color:red; border:none; display:inline; margin-left:10px ">-</button><select name="type" class="form-control column " style="float:right"><option hidden></option><option value="metrics">Metrics</option><option value="categorical">Categorical</option><option value="temporal_dimension">Temporal</option></select><div class="attrib_'+id+'" style="float:right"><br><br></div><br><br></div>');
+
+            $('#columns').append(html);
+            id+=1
+
+            $('button').click(function(){
+            var cla = "";
+            cla = "."+$(this).attr("id");
+            $('div').remove(cla);
+            });
+            });
+
+      $('#remove').click(function(){
+      if(id>0){
+            clas = ".attrib_" + (id-1);
+            $('div').remove(clas);
+            id-=1;
+            }
+            });
+
+
+            $("p").css({"font-size": "20px"});
+
+            });
+
+</script>
+<script>
+    console.log(newURL)
+</script>
+
+{% endblock %}

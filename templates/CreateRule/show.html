@@ -1,0 +1,109 @@
+{% extends "CreateRule/Rule.html" %}
+{% block body_block %}
+<style>
+    .on_top{
+    z-index:1000;
+    position: fixed;
+    background-color:blue;
+    color:white;
+    width: 30%;
+    height: 20%;
+    align: center;
+    margin-top: 200px;
+    margin-left: 300px;
+    padding-top: 30px;
+    padding-left: 30px;
+    }
+
+    .blur{
+    filter: blur(3px)
+    }
+
+    .btn{
+    margin:10px;
+    }
+
+</style>
+<div class="on_top" id="" hidden >
+    Please confirm if you want to delete the Rule
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input hidden type="text"  value="input" name="code">
+        <input type="submit" value=" Confirm " class="confirm btn btn-danger">
+        <input type="button" value=" Cancel " class="cancel btn btn-success">
+    </form>
+</div>
+
+<div class="table-responsive-md">
+<table class="table table-dark">
+    <thead >
+    <tr>
+        <th scope="col">
+            Rule no.
+        </th>
+        <th scope="col">
+            Rule
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for key, value in code.items %}
+    <tr id= {{key}} >
+        <th scope="row">
+            {{ key }}
+        </th>
+        <td>
+            {{ value|linebreaks }}
+        </td>
+        <td>
+            <button class="delete btn btn-primary">
+                Delete
+            </button>
+             <button class="edit btn btn-primary">
+                Edit
+            </button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<!--Below script is for the delete button on the page-->
+<script>
+    $(document).ready(function(){
+      $('.delete').click(function(){
+      $(this).closest('table').attr('class', 'blur');
+      $('.on_top').removeAttr('hidden');
+      $(this).closest('tr').attr('hidden','');
+      var id = $(this).closest('tr').attr('id');
+
+
+          $('.confirm').click(function(e){
+            $('input[type="text"]').val(id);
+          });
+
+          $('.cancel').click(function(e){
+            location.reload(true);
+          });
+
+      });
+      setTimeout(function(){
+      $('#request').fadeOut();}, 200);
+
+    });
+</script>
+<script>
+        $(document).ready(function(){
+      $('.edit').click(function(){
+<!--            in case this button wont work out on deployment use this below code-->
+<!--            var newURL = window.location.protocol + "//" + window.location.host-->
+            var newURL =  window.location.protocol + "//" +window.location.host + "/CreateRule/create_rule/";
+            window.location.href = newURL;
+
+      });
+
+      });
+</script>
+{% endblock %}
+<!--      -->

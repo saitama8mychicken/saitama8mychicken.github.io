@@ -1,0 +1,88 @@
+{% extends "CreateRule/Rule.html" %}
+{% block body_block %}
+<style>
+    input[type='file']{
+    width:100%;
+    background-color:red;
+    }
+</style>
+{% if uploaded != 'True' %}
+<form class="form" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        {% csrf_token %}
+
+        <center>
+            <input type="file" name="file" class="form-control" accept=".csv" style="width: 40%; height: 100px; margin:20px; align:center; padding: 30px">
+            <input type="submit" class="btn btn-success" name="submit" value="Submit">
+        </center>
+
+    </div>
+</form>
+{% elif uploaded == 'True' %}
+
+<div  style="background-color:gray; color:black; padding:10px; margin:30px; height: 150px; border: 2px solid red; overflow-y:auto">
+    <div style="background-color:yellow" id="upload"> file uploaded successfully </div>
+    <br>
+    <div align="center"> Predicted columns </div>
+    {% for key, value in dict.items %}
+    {{key}} -> {{value}}
+    <br>
+    {% endfor %}
+</div>
+
+<div class="table-responsive-md">
+<table class="table table-dark">
+    <thead >
+    <tr>
+        <th scope="col">
+            Rule no.
+        </th>
+        <th scope="col">
+            Rule
+        </th>
+        <th scope="col">
+            Output
+        </th>
+        <th scope="col">
+            PLOT
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for key, value in code.items %}
+    <tr id= {{key}} >
+        <th scope="row">
+            {{ key }}
+        </th>
+        <td>
+            {{ value|linebreaks }}
+        </td>
+        <td>
+            {% for k,v in output.items %}
+                {% if k == key %}
+                    {% for key, value in v.items %}
+                        {{key}} -> {{value}}
+                        <br>
+                    {% endfor %}
+                {% endif %}
+
+            {% endfor %}
+        </td>
+        <td>
+            {% for ke ,plot in plots.items %}
+                {% if ke == key %}
+                    <img src="data:image/png;base64,{{ plot }}" alt="" height="200" ,width="200">
+                {% endif %}
+            {% endfor %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+<script>
+    $('#upload').delay(5000).fadeOut(400)
+</script>
+
+{% endif %}
+{% endblock %}
